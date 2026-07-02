@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192">
     
-    <title>DHM COMMUNITY | Sovereign v15.2</title>
+    <title>DHM COMMUNITY | Sovereign v15.3</title>
     <!-- Tailwind CSS v4 Browser Engine CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- FontAwesome Pro Icon Emulation Node Pack -->
@@ -373,7 +373,7 @@
             });
         }
 
-        // ================= FEATURE 11: VOICE SEARCH (FIXED) =================
+        // ================= FEATURE 11: VOICE SEARCH (100% CLEAN MURNI) =================
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if(SpeechRecognition) {
             const recognition = new SpeechRecognition();
@@ -381,38 +381,52 @@
             
             const micBtn = document.getElementById('voice-search-btn');
             const searchInput = document.getElementById('pipeline-search-input-field');
+            const clearBtn = document.getElementById('pipeline-search-clear-btn');
 
             micBtn.addEventListener('click', () => {
-                // Request explicit permission first
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(() => {
+                try {
                     recognition.lang = window.currentLanguage === 'id' ? 'id-ID' : 'en-US';
                     recognition.start();
                     micBtn.innerHTML = `<i class="fa-solid fa-microphone-lines text-emerald-400 animate-pulse text-xs"></i>`;
                     dispatchSystemToastNotificationNotification(window.currentLanguage === 'id' ? 'Silakan bicara...' : 'Please speak...', 'success');
-                })
-                .catch((err) => {
-                    dispatchSystemToastNotificationNotification("Izinkan akses mikrofon di pengaturan browser!", "error");
-                });
+                } catch(e) {
+                    // Abaikan error kalau user double click mic
+                }
             });
 
             recognition.onresult = (event) => {
-                // Bersihkan teks (buang titik di akhir jika ada, karena Android sering otomatis tambah titik)
+                // Tangkap suara, hapus titik berlebih di belakang
                 const transcript = event.results[0][0].transcript.replace(/\.$/, '').trim();
+                
+                // Masukkan teks ke kolom pencarian
                 searchInput.value = transcript;
+                
+                // Kembalikan tombol mikrofon
                 micBtn.innerHTML = `<i class="fa-solid fa-microphone text-xs"></i>`;
+                
+                // Munculkan tombol X (Clear)
+                clearBtn.classList.remove('hidden');
+                
+                // Tampilkan notifikasi
                 dispatchSystemToastNotificationNotification(`Mencari: "${transcript}"`);
                 
-                // MENTRIGGER EVENT INPUT SUPAYA SISTEM PENCARIAN LANGSUNG JALAN
-                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                // EKSEKUSI PENCARIAN LANGSUNG KE FIREBASE
+                currentPage = 1; 
+                executeMainUIRendererPipelineStreamer();
             };
             
-            recognition.onend = () => { micBtn.innerHTML = `<i class="fa-solid fa-microphone text-xs"></i>`; };
-            recognition.onerror = () => {
+            recognition.onend = () => { 
+                micBtn.innerHTML = `<i class="fa-solid fa-microphone text-xs"></i>`; 
+            };
+            
+            recognition.onerror = (e) => {
                 micBtn.innerHTML = `<i class="fa-solid fa-microphone text-xs"></i>`;
-                dispatchSystemToastNotificationNotification('Suara tidak terdeteksi.', 'error');
+                if(e.error !== 'no-speech') {
+                    dispatchSystemToastNotificationNotification('Gagal mendeteksi suara / Izin ditolak.', 'error');
+                }
             };
         } else {
+            // Sembunyikan mic kalau browser user tidak mendukung sama sekali
             document.getElementById('voice-search-btn').style.display = 'none';
         }
 
