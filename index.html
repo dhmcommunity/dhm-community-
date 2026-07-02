@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192">
     
-    <title>DHM COMMUNITY | Sovereign v15.1</title>
+    <title>DHM COMMUNITY | Sovereign v15.2</title>
     <!-- Tailwind CSS v4 Browser Engine CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- FontAwesome Pro Icon Emulation Node Pack -->
@@ -27,18 +27,6 @@
             --text-color: #f8fafc;
             --border-color: rgba(255, 255, 255, 0.05);
         }
-        /* LIGHT MODE VARIABLES */
-        body.light-theme {
-            --bg-main: #f1f5f9;
-            --bg-card: rgba(255, 255, 255, 0.85);
-            --text-color: #0f172a;
-            --border-color: rgba(0, 0, 0, 0.1);
-        }
-        body.light-theme .text-white { color: #0f172a !important; }
-        body.light-theme .text-gray-400 { color: #475569 !important; }
-        body.light-theme .bg-white\/5 { background-color: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1); }
-        body.light-theme .bg-gray-900\/80 { background-color: rgba(255,255,255,0.9) !important; border-color: rgba(0,0,0,0.1) !important; }
-        body.light-theme .custom-dropdown-panel { background: rgba(255, 255, 255, 0.95); }
         
         body {
             background-color: var(--bg-main);
@@ -46,14 +34,12 @@
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .glass-ui {
             background: var(--bg-card);
             backdrop-filter: blur(35px);
             -webkit-backdrop-filter: blur(35px);
             border: 1px solid var(--border-color);
-            transition: background 0.3s ease, border-color 0.3s ease;
         }
         .progress-indicator-bar {
             position: fixed; top: 0; left: 0; height: 3px;
@@ -146,25 +132,14 @@
         </div>
     </header>
 
-    <!-- ADVANCED SETTINGS PANEL -->
+    <!-- CLEANED SETTINGS PANEL -->
     <div id="preferences-dropdown-panel" class="hidden max-w-md md:max-w-6xl mx-auto px-4 mt-2 animate-premium-card select-none">
         <div class="glass-ui p-5 rounded-2xl space-y-4 shadow-xl border border-purple-500/20">
             <h4 class="text-[10px] font-black text-purple-400 uppercase tracking-widest border-b border-white/5 pb-2"><i class="fa-solid fa-gears mr-1.5"></i> <span data-i18n="settingsTitle">Pengaturan Sistem</span></h4>
-            <div class="grid grid-cols-2 gap-3 text-center">
-                <div onclick="toggleTheme()" class="bg-white/5 border border-white/5 p-3 rounded-xl text-[10px] font-black cursor-pointer text-gray-400 hover:text-white transition flex flex-col items-center gap-1.5">
-                    <i class="fa-solid fa-moon text-base" id="icon-theme"></i>
-                    <span data-i18n="themeToggle">Mode Terang</span>
-                </div>
+            <div class="grid grid-cols-1 gap-3 text-center">
                 <div onclick="toggleLanguage()" class="bg-white/5 border border-white/5 p-3 rounded-xl text-[10px] font-black cursor-pointer text-gray-400 hover:text-white transition flex flex-col items-center gap-1.5">
                     <i class="fa-solid fa-language text-base text-blue-400"></i>
                     <span id="lang-label">Bahasa: INDO</span>
-                </div>
-                <div onclick="toggleLocalPreferenceNode('hapticState')" id="pref-widget-haptic" class="bg-white/5 border border-white/5 p-3 rounded-xl text-[10px] font-black cursor-pointer text-gray-400 hover:text-white transition flex flex-col items-center gap-1.5">
-                    <i class="fa-solid fa-mobile-screen text-base"></i> Haptic Engine
-                </div>
-                <div onclick="requestNotificationPermission()" class="bg-white/5 border border-white/5 p-3 rounded-xl text-[10px] font-black cursor-pointer text-gray-400 hover:text-emerald-400 transition flex flex-col items-center gap-1.5">
-                    <i class="fa-solid fa-bell text-base text-emerald-400"></i>
-                    <span data-i18n="pushToggle">Notifikasi</span>
                 </div>
             </div>
         </div>
@@ -216,7 +191,7 @@
                 </button>
             </div>
 
-            <!-- Custom Select Dropdowns without Native Options (RESTORED DARI V14.1) -->
+            <!-- Custom Select Dropdowns without Native Options -->
             <div class="flex items-center gap-2 select-none relative">
                 <div class="w-1/2 relative">
                     <div onclick="toggleCustomSelectorDropdownMenu('game-cat')" id="trigger-dropdown-game-cat" class="w-full bg-gray-900/80 glass-ui text-[11px] font-black rounded-xl pl-8 pr-4 py-3.5 flex items-center justify-between cursor-pointer border border-white/5 truncate">
@@ -354,7 +329,6 @@
 
         let memoryCacheEntireScriptsDataset = {};
         let localBookmarksRegistryList = JSON.parse(localStorage.getItem('dhm_v10_bookmarks')) || [];
-        let localPreferencesConfigObject = JSON.parse(localStorage.getItem('dhm_v10_pref_config')) || { hapticState: true };
         
         let activeSelectedGameCategoryValue = "Semua Game";
         let activeSelectedSortOrderValue = "newest";
@@ -399,22 +373,7 @@
             });
         }
 
-        // ================= FEATURE 6: PUSH NOTIFICATION REQUEST =================
-        window.requestNotificationPermission = () => {
-            if (!("Notification" in window)) {
-                dispatchSystemToastNotificationNotification("Browser ini tidak mendukung notifikasi.", "error");
-                return;
-            }
-            Notification.requestPermission().then((permission) => {
-                if (permission === "granted") {
-                    dispatchSystemToastNotificationNotification("Notifikasi Berhasil Diaktifkan!", "success");
-                } else {
-                    dispatchSystemToastNotificationNotification("Izin notifikasi ditolak.", "error");
-                }
-            });
-        };
-
-        // ================= FEATURE 11: VOICE SEARCH (WEB SPEECH API) =================
+        // ================= FEATURE 11: VOICE SEARCH (FIXED) =================
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if(SpeechRecognition) {
             const recognition = new SpeechRecognition();
@@ -424,21 +383,32 @@
             const searchInput = document.getElementById('pipeline-search-input-field');
 
             micBtn.addEventListener('click', () => {
-                recognition.lang = window.currentLanguage === 'id' ? 'id-ID' : 'en-US';
-                recognition.start();
-                micBtn.innerHTML = `<i class="fa-solid fa-microphone-lines text-emerald-400 animate-pulse text-xs"></i>`;
-                dispatchSystemToastNotificationNotification(window.currentLanguage === 'id' ? 'Silakan bicara...' : 'Please speak...', 'success');
+                // Request explicit permission first
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(() => {
+                    recognition.lang = window.currentLanguage === 'id' ? 'id-ID' : 'en-US';
+                    recognition.start();
+                    micBtn.innerHTML = `<i class="fa-solid fa-microphone-lines text-emerald-400 animate-pulse text-xs"></i>`;
+                    dispatchSystemToastNotificationNotification(window.currentLanguage === 'id' ? 'Silakan bicara...' : 'Please speak...', 'success');
+                })
+                .catch((err) => {
+                    dispatchSystemToastNotificationNotification("Izinkan akses mikrofon di pengaturan browser!", "error");
+                });
             });
 
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
+                // Bersihkan teks (buang titik di akhir jika ada, karena Android sering otomatis tambah titik)
+                const transcript = event.results[0][0].transcript.replace(/\.$/, '').trim();
                 searchInput.value = transcript;
                 micBtn.innerHTML = `<i class="fa-solid fa-microphone text-xs"></i>`;
                 dispatchSystemToastNotificationNotification(`Mencari: "${transcript}"`);
-                currentPage = 1; executeMainUIRendererPipelineStreamer();
+                
+                // MENTRIGGER EVENT INPUT SUPAYA SISTEM PENCARIAN LANGSUNG JALAN
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
             };
-
-            recognition.onerror = (event) => {
+            
+            recognition.onend = () => { micBtn.innerHTML = `<i class="fa-solid fa-microphone text-xs"></i>`; };
+            recognition.onerror = () => {
                 micBtn.innerHTML = `<i class="fa-solid fa-microphone text-xs"></i>`;
                 dispatchSystemToastNotificationNotification('Suara tidak terdeteksi.', 'error');
             };
@@ -450,13 +420,13 @@
         window.currentLanguage = localStorage.getItem('dhm_lang') || 'id';
         const dict = {
             'id': {
-                settingsTitle: "Pengaturan Sistem", themeToggle: "Ganti Tema", pushToggle: "Notifikasi",
+                settingsTitle: "Pengaturan Sistem",
                 statDb: "DATABASE", statFav: "FAVORIT", statCopy: "TOTAL COPY",
                 navScript: "Scripts", navMsg: "Pesan", navPop: "Populer",
                 searchPlace: "Cari nama script, game..."
             },
             'en': {
-                settingsTitle: "System Settings", themeToggle: "Toggle Theme", pushToggle: "Notifications",
+                settingsTitle: "System Settings",
                 statDb: "DATABASE", statFav: "FAVORITES", statCopy: "TOTAL COPIES",
                 navScript: "Scripts", navMsg: "Messages", navPop: "Popular",
                 searchPlace: "Search script, game..."
@@ -480,27 +450,7 @@
         }
         applyLanguage();
 
-        // ================= FEATURE 3: DARK/LIGHT MODE SWITCHER =================
-        window.currentTheme = localStorage.getItem('dhm_theme') || 'dark';
-        window.toggleTheme = () => {
-            window.currentTheme = window.currentTheme === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('dhm_theme', window.currentTheme);
-            applyTheme();
-        };
-
-        function applyTheme() {
-            const icon = document.getElementById('icon-theme');
-            if(window.currentTheme === 'light') {
-                document.body.classList.add('light-theme');
-                icon.className = "fa-solid fa-sun text-base text-amber-500";
-            } else {
-                document.body.classList.remove('light-theme');
-                icon.className = "fa-solid fa-moon text-base text-gray-400";
-            }
-        }
-        applyTheme();
-
-        // ================= CORE FIREBASE & LOGIC (RESTORED DARI V14.1) =================
+        // ================= CORE FIREBASE & LOGIC =================
 
         // Discord Popup
         const hasJoinedDiscord = localStorage.getItem('dhm_discord_joined_v14');
@@ -508,20 +458,16 @@
             document.getElementById('discord-popup-layer').classList.remove('hidden');
         }
         window.markDiscordPopupDone = () => {
-            triggerDeviceShortHapticFeedbackVibration();
             localStorage.setItem('dhm_discord_joined_v14', 'true');
             document.getElementById('discord-popup-layer').classList.add('hidden');
         };
 
         const escapeHTML = (str) => {
             if (!str) return '';
-            return str.replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[tag] || tag));
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         };
 
         window.toggleCustomSelectorDropdownMenu = (dropdownKeyId) => {
-            triggerDeviceShortHapticFeedbackVibration();
             const panel = document.getElementById(`panel-dropdown-${dropdownKeyId}`);
             const chevron = document.getElementById(`chevron-${dropdownKeyId}`);
             ['game-cat', 'sort-order', 'msg-target'].forEach(key => {
@@ -598,7 +544,7 @@
                 });
             } else { box.innerHTML = '<p class="text-xs text-gray-600 font-mono text-center py-4">Belum ada FAQ bantuan.</p>'; }
         });
-        window.toggleFaqCollapseRowAnimation = (idx) => { triggerDeviceShortHapticFeedbackVibration(); document.getElementById(`faq-answer-collapse-block-${idx}`).classList.toggle('hidden'); };
+        window.toggleFaqCollapseRowAnimation = (idx) => { document.getElementById(`faq-answer-collapse-block-${idx}`).classList.toggle('hidden'); };
 
         onValue(ref(db, 'categories'), (snap) => {
             const listContainer = document.getElementById('list-options-game-cat');
@@ -673,11 +619,10 @@
             box.innerHTML = ''; 
             let list = Object.keys(memoryCacheEntireScriptsDataset).map(k => ({ id: k, ...memoryCacheEntireScriptsDataset[k] }));
 
-            // RENDER LEADERBOARD DI TAB TERSENDIRI
+            // RENDER LEADERBOARD
             if (leaderboardBox && list.length > 0) {
                 let topScripts = [...list].sort((a, b) => (b.copyCount || 0) - (a.copyCount || 0)).slice(0, 10);
                 leaderboardBox.innerHTML = '';
-                
                 const medalColors = ['text-yellow-400', 'text-gray-400', 'text-amber-700'];
                 const crownIcons = ['fa-crown', 'fa-medal', 'fa-medal'];
                 
@@ -770,7 +715,6 @@
         }
 
         window.changePage = (page) => {
-            triggerDeviceShortHapticFeedbackVibration();
             currentPage = page;
             executeMainUIRendererPipelineStreamer();
             window.scrollTo({top: 0, behavior: 'smooth'});
@@ -826,7 +770,6 @@
         }
 
         window.executeCopyScriptPayloadPipeline = (id, b64) => {
-            triggerDeviceShortHapticFeedbackVibration();
             const originalText = decodeURIComponent(atob(b64));
             navigator.clipboard.writeText(originalText).then(() => {
                 window.dispatchSystemToastNotificationNotification('Skrip berhasil disalin!', 'success');
@@ -842,7 +785,6 @@
         };
 
         window.executeTargetBookmarkTogglePipeline = (id) => {
-            triggerDeviceShortHapticFeedbackVibration();
             localBookmarksRegistryList = localBookmarksRegistryList.includes(id) ? localBookmarksRegistryList.filter(i => i !== id) : [...localBookmarksRegistryList, id];
             localStorage.setItem('dhm_v10_bookmarks', JSON.stringify(localBookmarksRegistryList));
             document.getElementById('metric-label-bookmarks').innerText = localBookmarksRegistryList.length; 
@@ -850,7 +792,6 @@
         };
 
         window.switchActiveViewportContext = (id, ref) => {
-            triggerDeviceShortHapticFeedbackVibration();
             document.getElementById('viewport-scripts-hub').classList.toggle('hidden', id !== 'scripts');
             document.getElementById('viewport-message-hub').classList.toggle('hidden', id !== 'message');
             document.getElementById('viewport-leaderboard-hub').classList.toggle('hidden', id !== 'leaderboard');
@@ -862,40 +803,31 @@
         };
 
         window.triggerLocalPreferencesControlPanel = () => { 
-            triggerDeviceShortHapticFeedbackVibration(); 
             document.getElementById('preferences-dropdown-panel').classList.toggle('hidden'); 
         };
         
-        window.toggleLocalPreferenceNode = (k) => { 
-            triggerDeviceShortHapticFeedbackVibration(); 
-            localPreferencesConfigObject[k] = !localPreferencesConfigObject[k]; 
-            localStorage.setItem('dhm_v10_pref_config', JSON.stringify(localPreferencesConfigObject)); 
-        };
-
-        function triggerDeviceShortHapticFeedbackVibration() { 
-            if(localPreferencesConfigObject.hapticState && navigator.vibrate) navigator.vibrate(10); 
-        }
-
         window.clearActiveSearchFieldPipeline = () => { 
-            triggerDeviceShortHapticFeedbackVibration(); 
-            document.getElementById('pipeline-search-input-field').value = ''; 
+            const input = document.getElementById('pipeline-search-input-field');
+            input.value = ''; 
+            document.getElementById('pipeline-search-clear-btn').classList.add('hidden');
             currentPage = 1; 
             executeMainUIRendererPipelineStreamer(); 
         };
 
-        window.dispatchNativeSharePipeline = () => { 
-            triggerDeviceShortHapticFeedbackVibration(); 
-            if(navigator.share) navigator.share({ title: 'DHM COMMUNITY', url: window.location.href }); 
-        };
-
-        document.getElementById('pipeline-search-input-field').addEventListener('input', () => {
+        // Event listener text input untuk mendeteksi perubahan ketikan dan memunculkan tombol silang X
+        document.getElementById('pipeline-search-input-field').addEventListener('input', (e) => {
+            const clearBtn = document.getElementById('pipeline-search-clear-btn');
+            if (e.target.value.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
             currentPage = 1; 
             executeMainUIRendererPipelineStreamer();
         });
         
         // VIEW DETAIL MODAL OVERLAY DENGAN SYNTAX HIGHLIGHTING (PRISM)
         window.openScriptDetailTab = (id) => {
-            triggerDeviceShortHapticFeedbackVibration();
             const item = memoryCacheEntireScriptsDataset[id];
             if(!item) return dispatchSystemToastNotificationNotification('Gagal memuat detail data.', 'error');
             
@@ -958,7 +890,6 @@
             
             const copyBtn = modal.querySelector('#modal-copy-btn');
             copyBtn.addEventListener('click', () => {
-                triggerDeviceShortHapticFeedbackVibration();
                 navigator.clipboard.writeText(item.scriptText).then(() => {
                     window.dispatchSystemToastNotificationNotification('Script berhasil disalin langsung dari menu detail!', 'success');
                     runTransaction(ref(db, `scripts/${id}/copyCount`), c => (c || 0) + 1);
@@ -968,7 +899,6 @@
         };
 
         window.downloadScriptTxt = (title, b64) => {
-            triggerDeviceShortHapticFeedbackVibration();
             const text = decodeURIComponent(atob(b64));
             const blob = new Blob([text], {type: "text/plain"});
             const url = URL.createObjectURL(blob);
@@ -981,7 +911,6 @@
         };
 
         window.shareSpecificScript = (title, purpose) => {
-            triggerDeviceShortHapticFeedbackVibration();
             if (navigator.share) {
                 navigator.share({ title: `DHM SCRIPT: ${title}`, text: `Dapatkan Script Terkeren ini: ${title}\nFitur: ${purpose}\n\nDownload sekarang di DHM COMMUNITY Portal!`, url: window.location.href }).catch(() => {});
             } else {
@@ -992,7 +921,6 @@
 
         // Submit pesan ke firebase
         window.submitUserMessagePipeline = () => {
-            triggerDeviceShortHapticFeedbackVibration();
             const n = document.getElementById('msg-sender-name').value.trim();
             const m = document.getElementById('msg-text-content').value.trim();
             if(!n || !m) return dispatchSystemToastNotificationNotification('Kolom Nama & Isi Pesan wajib diisi!', 'error');
@@ -1003,11 +931,20 @@
         };
 
         window.injectPresetTextTemplateIntoMessagePayload = (id) => {
-            triggerDeviceShortHapticFeedbackVibration();
             const box = document.getElementById('msg-text-content');
             if(id === 1) box.value = "[LAPORAN ERROR]: Skrip Hub mengalami Force Close sesaat setelah dieksekusi di Executor Mobile.";
             else if(id === 2) box.value = "[REQUEST GAME SCRIPT]: Tolong tambahkan koleksi skrip terbaru untuk game Roblox: ";
             else if(id === 3) box.value = "[DONASI PARTNER]: Saya berniat mengajukan proposal kerja sama.";
+        };
+
+        window.dispatchSystemToastNotificationNotification = (msg, type = 'success') => {
+            const hub = document.getElementById('toast-master-hub');
+            const toast = document.createElement('div');
+            toast.className = `glass-ui flex items-center gap-3 text-white px-4 py-3 rounded-full text-xs font-black border ${type === 'success' ? 'border-emerald-500/20' : 'border-red-500/20'} shadow-2xl opacity-0 transition duration-300 transform translate-y-[-15px] pointer-events-auto`;
+            toast.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} animate-pulse"></span> ${msg}`;
+            hub.appendChild(toast);
+            setTimeout(() => toast.classList.remove('opacity-0', 'translate-y-[-15px]'), 15);
+            setTimeout(() => { toast.classList.add('opacity-0', 'scale-90'); setTimeout(() => toast.remove(), 300); }, 3500);
         };
 
         // Background Particles
