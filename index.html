@@ -7,7 +7,8 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://via.placeholder.com/192">
     
-    <title>DHM COMMUNITY | Sovereign v16.8 (Final)</title>
+    <title>DHM COMMUNITY | Sovereign v17.0</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
@@ -173,7 +174,6 @@
         </div>
 
         <div id="viewport-scripts-hub" class="space-y-4 block">
-            
             <div class="grid grid-cols-3 gap-2.5 select-none">
                 <div class="glass-ui p-3.5 rounded-2xl text-center relative overflow-hidden">
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider" data-i18n="statDb">DATABASE</p>
@@ -337,7 +337,6 @@
                 </div>
             </div>
         </div>
-
     </main>
 
     <div class="fixed bottom-4 left-4 right-4 max-w-md md:max-w-xl mx-auto glass-ui rounded-2xl p-1.5 grid grid-cols-5 text-center text-[9px] font-black text-gray-500 z-50 shadow-2xl select-none">
@@ -359,25 +358,20 @@
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
     <script type="module">
-        // MODUL FIREBASE ASLI TERMASUK AUTENTIKASI GOOGLE
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, runTransaction, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // ==============================================================================
-        // WAJIB GANTI INI DENGAN FIREBASE CONFIG DARI CONSOLE KAMU
-        // JIKA API KEY KOSONG, LOGIN GOOGLE AKAN ERROR (TAPI DATABASE TETAP BACA)
-        // ==============================================================================
         const firebaseConfig = {
-            apiKey: "ISI_API_KEY_FIREBASE_KAMU_DISINI_AGAR_BISA_LOGIN_GOOGLE",
-            authDomain: "dhm-store-default-rtdb.firebaseapp.com",
+            apiKey: "AIzaSyAP3mUff64hNw1wwBdKobezuHT51Ooboxk",
+            authDomain: "dhm-store.firebaseapp.com",
             databaseURL: "https://dhm-store-default-rtdb.firebaseio.com",
-            projectId: "dhm-store-default-rtdb",
-            storageBucket: "dhm-store-default-rtdb.appspot.com",
-            messagingSenderId: "ISI_MESSAGING_SENDER_ID",
-            appId: "ISI_APP_ID"
+            projectId: "dhm-store",
+            storageBucket: "dhm-store.firebasestorage.app",
+            messagingSenderId: "62010800668",
+            appId: "1:62010800668:web:8245b1dffc0a46f0aa3dd9",
+            measurementId: "G-NVVGGSQQRX"
         };
-        // ==============================================================================
 
         let db, auth, provider;
         try {
@@ -385,11 +379,35 @@
             db = getDatabase(app);
             auth = getAuth(app);
             provider = new GoogleAuthProvider();
+
+            getRedirectResult(auth).then((result) => {
+                if (result) {
+                    const user = result.user;
+                    dhmUserProfile = {
+                        name: user.displayName,
+                        avatar: 'fa-google',
+                        color: 'bg-gradient-to-tr from-blue-600 to-blue-900',
+                        isVerified: true,
+                        photoUrl: user.photoURL
+                    };
+                    localStorage.setItem('dhm_user_profile', JSON.stringify(dhmUserProfile));
+                    window.applyHeaderProfile();
+                    
+                    const modal = document.getElementById('profile-modal-layer');
+                    if(modal && !modal.classList.contains('hidden')) window.toggleProfileModal();
+                    
+                    window.dispatchSystemToastNotificationNotification(`Welcome, ${dhmUserProfile.name}!`, 'success');
+                    recordUserActivity("Google Login Redirect Success");
+                }
+            }).catch((error) => {
+                console.error("Redirect Auth Error:", error);
+                window.dispatchSystemToastNotificationNotification('Google Login Gagal: ' + error.message, 'error');
+            });
+
         } catch (error) {
             console.error("Firebase Initialization Error:", error);
         }
 
-        // ================= FEATURE 30: PARTICLES BACKGROUND =================
         try {
             particlesJS('background-particles', {
                 "particles": { "number": { "value": 45, "density": { "enable": true, "value_area": 800 } }, "color": { "value": ["#a855f7", "#3b82f6"] }, "shape": { "type": "circle" }, "opacity": { "value": 0.4, "random": true }, "size": { "value": 3, "random": true }, "line_linked": { "enable": true, "distance": 150, "color": "#a855f7", "opacity": 0.15, "width": 1 }, "move": { "enable": true, "speed": 1.2, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false } },
@@ -398,7 +416,6 @@
             });
         } catch (e) {}
 
-        // ================= FEATURE 13: LANGUAGE SYSTEM =================
         if(!localStorage.getItem('dhm_lang')) {
             const userLang = navigator.language || navigator.userLanguage;
             window.currentLanguage = userLang.startsWith('id') ? 'id' : 'en';
@@ -433,8 +450,10 @@
                     }
                 }
             });
-            document.getElementById('pipeline-search-input-field').placeholder = lang.searchPlace;
-            document.getElementById('lang-text').innerText = window.currentLanguage.toUpperCase();
+            const searchInput = document.getElementById('pipeline-search-input-field');
+            if(searchInput) searchInput.placeholder = lang.searchPlace;
+            const langText = document.getElementById('lang-text');
+            if(langText) langText.innerText = window.currentLanguage.toUpperCase();
         };
 
         window.toggleLanguage = () => {
@@ -451,7 +470,6 @@
         };
         window.applyLanguage();
 
-        // ================= STATE & VARIABLES =================
         let memoryCacheEntireScriptsDataset = {};
         let localBookmarksRegistryList = JSON.parse(localStorage.getItem('dhm_v10_bookmarks')) || [];
         
@@ -476,7 +494,6 @@
 
         document.getElementById('metric-label-bookmarks').innerText = localBookmarksRegistryList.length;
 
-        // ================= UI SKELETON =================
         window.renderSkeletonLoading = () => {
             const box = document.getElementById('live-scripts-render-target-box');
             if(!box) return;
@@ -499,7 +516,6 @@
         };
         window.renderSkeletonLoading();
 
-        // ================= FEATURE 2: ACTIVITY LOG =================
         const recordUserActivity = (actionLabel) => {
             if(!db) return;
             fetch('https://api.ipify.org?format=json').then(r => r.json()).then(data => {
@@ -513,7 +529,6 @@
         };
         setTimeout(() => recordUserActivity("App Launched"), 2500);
 
-        // ================= DISCORD POPUP =================
         if(!localStorage.getItem('dhm_discord_joined')) {
             document.getElementById('discord-popup-layer').classList.remove('hidden');
         }
@@ -522,7 +537,6 @@
             document.getElementById('discord-popup-layer').classList.add('hidden');
         };
 
-        // ================= FEATURE 4 & 1: VERIFIED BADGE & NAME GUARD =================
         const verifiedMasterNames = ["admin", "owner", "developer", "dhm"];
         
         window.isVerifiedBadgeValid = (name) => {
@@ -534,7 +548,6 @@
             return forbiddenNames.includes(name.toLowerCase().trim());
         };
 
-        // ================= PROFILE SYSTEM & REAL GOOGLE LOGIN =================
         window.avatars = ['fa-user-ninja', 'fa-ghost', 'fa-robot', 'fa-skull', 'fa-user-astronaut', 'fa-cat', 'fa-dragon', 'fa-mask'];
         window.colors = [
             'bg-gradient-to-tr from-purple-600 to-blue-600', 'bg-gradient-to-tr from-emerald-500 to-teal-700',
@@ -626,25 +639,10 @@
             window.dispatchSystemToastNotificationNotification('Profil berhasil disimpan!', 'success');
         };
 
-        // REAL GOOGLE LOGIN TRIGGER
         window.loginWithGoogle = () => {
-            if(!auth) return window.dispatchSystemToastNotificationNotification('Sistem Auth belum di-setup dengan API Key!', 'error');
-            signInWithPopup(auth, provider).then((result) => {
-                const user = result.user;
-                dhmUserProfile = {
-                    name: user.displayName,
-                    avatar: 'fa-google',
-                    color: 'bg-gradient-to-tr from-blue-600 to-blue-900',
-                    isVerified: true,
-                    photoUrl: user.photoURL
-                };
-                localStorage.setItem('dhm_user_profile', JSON.stringify(dhmUserProfile));
-                window.applyHeaderProfile();
-                window.toggleProfileModal();
-                window.dispatchSystemToastNotificationNotification(`Welcome, ${dhmUserProfile.name}!`, 'success');
-                recordUserActivity("Google Login Success");
-            }).catch((error) => {
-                window.dispatchSystemToastNotificationNotification('Google Login Gagal/Dibatalkan.', 'error');
+            if(!auth) return window.dispatchSystemToastNotificationNotification('Sistem Auth belum terkoneksi!', 'error');
+            signInWithRedirect(auth, provider).catch((error) => {
+                window.dispatchSystemToastNotificationNotification('Gagal mengarahkan ke Google.', 'error');
                 console.error(error);
             });
         };
@@ -662,7 +660,6 @@
             }
         };
 
-        // ================= SELECTORS & UI SWITCHER =================
         window.toggleCustomSelectorDropdownMenu = (dropdownKeyId) => {
             const panel = document.getElementById(`panel-dropdown-${dropdownKeyId}`);
             const chevron = document.getElementById(`chevron-${dropdownKeyId}`);
@@ -729,10 +726,7 @@
             }
         };
 
-
-        // ================= FIREBASE LISTENERS (SAFE & RELIABLE) =================
         if(db) {
-            // GUARD
             try {
                 onValue(ref(db, 'system_guard'), (snap) => {
                     if(snap.exists()) {
@@ -749,7 +743,6 @@
                 }, e => console.error(e));
             } catch(e) {}
 
-            // CATEGORIES
             try {
                 onValue(ref(db, 'categories'), (snap) => {
                     const listContainer = document.getElementById('list-options-game-cat');
@@ -764,7 +757,6 @@
                 }, e => console.error(e));
             } catch(e) {}
 
-            // BANNERS
             try {
                 onValue(ref(db, 'banners'), (snapshot) => {
                     const track = document.getElementById('carousel-track-container');
@@ -795,7 +787,6 @@
                 }, e => console.error(e));
             } catch(e) {}
 
-            // FAQ
             try {
                 onValue(ref(db, 'faqs'), (snap) => {
                     const box = document.getElementById('faq-accordion-live-injections-box'); box.innerHTML = '';
@@ -814,7 +805,6 @@
                 }, e => console.error(e));
             } catch(e) {}
             
-            // CORE SCRIPTS
             try {
                 onValue(ref(db, 'scripts'), (snap) => { 
                     memoryCacheEntireScriptsDataset = snap.val() || {}; 
@@ -826,7 +816,6 @@
                 });
             } catch(e) { console.error("Script Listener Error:", e); }
 
-            // CHAT LISTENERS
             try {
                 const chatContainer = document.getElementById('chat-messages-container');
                 const chatQueryRef = query(ref(db, 'global_chat'), orderByChild('timestamp'), limitToLast(60));
@@ -883,8 +872,6 @@
             } catch(e) {}
         }
 
-
-        // ================= RENDERING LOGIC =================
         window.toggleFaqCollapseRowAnimation = (idx) => { document.getElementById(`faq-answer-collapse-block-${idx}`).classList.toggle('hidden'); };
 
         window.calculateAggregatedCopiesMetricCounter = () => { 
@@ -904,7 +891,6 @@
             box.innerHTML = ''; 
             let list = Object.keys(memoryCacheEntireScriptsDataset).map(k => ({ id: k, ...memoryCacheEntireScriptsDataset[k] }));
 
-            // Render Leaderboard
             if (leaderboardBox && list.length > 0) {
                 let topScripts = [...list].sort((a, b) => (b.copyCount || 0) - (a.copyCount || 0)).slice(0, 10);
                 leaderboardBox.innerHTML = '';
